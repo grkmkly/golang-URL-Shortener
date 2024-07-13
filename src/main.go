@@ -46,6 +46,7 @@ func generateKey() string {
 	}
 	return key
 }
+
 func homePage(w http.ResponseWriter, r *http.Request) {
 	htmlByte, err := os.ReadFile("src/index.html")
 	if err != nil {
@@ -53,23 +54,38 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(htmlByte)
 }
-func urlShorter(w http.ResponseWriter, r *http.Request) {
 
+func urlShorter(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		key := generateKey()
 
-		newUrl := fmt.Sprintf("https://mgk.com/%v", key) // yeni url oluşturuldu
-		oldUrl := r.FormValue("fname")
-		urlMap[newUrl] = oldUrl // oldUrl = Gelen Url newUrl yarattığımız Url
-
-		fmt.Println(urlMap)
+		newUrl := fmt.Sprintf("localhost:5000/homepage/%v", key) // yeni url oluşturuldu
+		oldUrl := r.FormValue("fname")                           //  gelen url alındı
+		urlMap[newUrl] = oldUrl                                  // oldUrl = Gelen Url newUrl yarattığımız Url
+		//fmt.Println(urlMap)
 		writeHtml(newUrl)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		//fmt.Printf("OldUrl : %v\nNewUrl : %v \n", urlMap[newUrl], newUrl)
+		http.Redirect(w, r, "/homepage", http.StatusSeeOther)
+	}
+}
+
+func redirectUrl(w http.ResponseWriter, r *http.Request) {
+	hosts := fmt.Sprintf("localhost:5000%v", r.URL.Path)
+	fmt.Printf("Hosts : %v\n", hosts)
+	for key, value := range urlMap {
+		fmt.Printf("Key : %v\n", key)
+		if key == hosts {
+			http.Redirect(w, r, value, http.StatusSeeOther)
+			return
+		}
 	}
 }
 
 func main() {
-	http.HandleFunc("/", homePage)
+
+	http.HandleFunc("/homepage", homePage)
 	http.HandleFunc("/action-url", urlShorter)
+	http.HandleFunc("/homepage/{key}", redirectUrl)
 	http.ListenAndServe(":5000", nil)
+
 }
