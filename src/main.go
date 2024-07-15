@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -87,6 +89,7 @@ func urlShorter(w http.ResponseWriter, r *http.Request) {
 		oldUrl := r.FormValue("url")                             //  gelen url alındı
 		urlMap[newUrl] = oldUrl                                  // oldUrl = Gelen Url newUrl yarattığımız Url
 		writeHtml(newUrl)
+		go logging(newUrl, oldUrl)
 		http.Redirect(w, r, "/linkpage", http.StatusSeeOther)
 	}
 }
@@ -107,6 +110,48 @@ func linkPage(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	w.Write(htmlByte)
+}
+func getIpAdrs() (net.IP, error) {
+	var ipv4 net.IP
+
+	host, err := os.Hostname() // PC'nin hostuna bakılıyor
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	adrrs, err := net.LookupIP(host) // PC'nin ip değerlerine bakılıyor
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, value := range adrrs {
+		ipv4 = value.To4() // Pcnin ip değerlerindeki ipv4 değerini alıyor
+		if ipv4 != nil {
+			return ipv4, nil
+		}
+	}
+	return nil, errors.New("IpNotFound")
+
+}
+func logging(newUrl string, oldUrl string) {
+	ipv4, err := getIpAdrs() // İP adresini aldık
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Dosya okuma ve yazma işlemi
+	logByte, err := os.ReadFile("logging.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	logText := string(logByte)
+
+	if logText == "" {
+		logText += fmt.Sprintf("Ip : %v,\tNewUrl : %v\tOldUrl : %v", ipv4, newUrl, oldUrl)
+		os.WriteFile("logging.txt", []byte(logText), 0755)
+		return
+	}
+	logText += fmt.Sprintf("\nIP : %v\t,newUrl : %v\tOldUrl : %v", ipv4, newUrl, oldUrl)
+	os.WriteFile("logging.txt", []byte(logText), 0755)
 }
 
 func main() {
