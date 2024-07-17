@@ -63,6 +63,7 @@ func writeHtml(newUrl string) {
 // var urlMap map[string]string
 var urlMap = make(map[string]string)
 
+// Key üreteci
 func generateKey() string {
 	key := ""
 	alphabet := "ABCDEFGHIJKLMNOPRSTUVYZabcdefghijklmnoprstuvyz"
@@ -71,9 +72,18 @@ func generateKey() string {
 		rand := rand.Intn(46)
 		key += alphabe[rand]
 	}
+	// Eğer linkler aynı olursa tekrar key üretme
+	formatKey := fmt.Sprintf("localhost:5000/linkpage/%v", key)
+	for key := range urlMap {
+		if key == formatKey {
+			generateKey()
+		}
+	}
+
 	return key
 }
 
+// HomePage oluşturucu
 func homePage(w http.ResponseWriter, r *http.Request) {
 	htmlByte, err := os.ReadFile("src/index.html")
 	if err != nil {
@@ -82,6 +92,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	w.Write(htmlByte)
 }
 
+// Url kısaltıcı
 func urlShorter(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		key := generateKey()
@@ -89,11 +100,12 @@ func urlShorter(w http.ResponseWriter, r *http.Request) {
 		oldUrl := r.FormValue("url")                             //  gelen url alındı
 		urlMap[newUrl] = oldUrl                                  // oldUrl = Gelen Url newUrl yarattığımız Url
 		writeHtml(newUrl)
-		go logging(newUrl, oldUrl)
+		logging(newUrl, oldUrl)
 		http.Redirect(w, r, "/linkpage", http.StatusSeeOther)
 	}
 }
 
+// Url'yi yönlendirici
 func redirectUrl(w http.ResponseWriter, r *http.Request) {
 	hosts := fmt.Sprintf("localhost:5000%v", r.URL.Path)
 	for key, value := range urlMap {
@@ -104,6 +116,8 @@ func redirectUrl(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+// Link sayfası oluşturucu
 func linkPage(w http.ResponseWriter, r *http.Request) {
 	htmlByte, err := os.ReadFile("src/newUrl.html")
 	if err != nil {
@@ -111,6 +125,8 @@ func linkPage(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(htmlByte)
 }
+
+// Ip adres getirici
 func getIpAdrs() (net.IP, error) {
 	var ipv4 net.IP
 
@@ -131,8 +147,9 @@ func getIpAdrs() (net.IP, error) {
 		}
 	}
 	return nil, errors.New("IpNotFound")
-
 }
+
+// LOG dosyasına kayıt
 func logging(newUrl string, oldUrl string) {
 	ipv4, err := getIpAdrs() // İP adresini aldık
 	if err != nil {
@@ -153,12 +170,16 @@ func logging(newUrl string, oldUrl string) {
 	logText += fmt.Sprintf("\nIP : %v\t,newUrl : %v\tOldUrl : %v", ipv4, newUrl, oldUrl)
 	os.WriteFile("logging.txt", []byte(logText), 0755)
 }
+func redirectHome(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/homepage", http.StatusSeeOther)
+}
 
+// MAİN
 func main() {
+	http.HandleFunc("/", redirectHome)
 	http.HandleFunc("/linkpage", linkPage)
 	http.HandleFunc("/homepage", homePage)
 	http.HandleFunc("/action-url", urlShorter)
 	http.HandleFunc("/linkpage/{key}", redirectUrl)
 	http.ListenAndServe(":5000", nil)
-
 }
