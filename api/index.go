@@ -180,7 +180,7 @@ func redirectHome(w http.ResponseWriter, r *http.Request) {
 func main() {
 	port = os.Getenv("PORT")
 	if port == "" {
-		port = "8000"
+		port = "8080"
 	}
 	http.HandleFunc("/", redirectHome)
 	http.HandleFunc("/linkpage", linkPage)
