@@ -176,10 +176,15 @@ func redirectHome(w http.ResponseWriter, r *http.Request) {
 
 // MAİN
 func main() {
+
 	http.HandleFunc("/", redirectHome)
 	http.HandleFunc("/linkpage", linkPage)
 	http.HandleFunc("/homepage", homePage)
 	http.HandleFunc("/action-url", urlShorter)
 	http.HandleFunc("/linkpage/{key}", redirectUrl)
-	http.ListenAndServe(":5000", nil)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = ":8000"
+	}
+	http.ListenAndServe(":"+port, nil)
 }
