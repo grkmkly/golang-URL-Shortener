@@ -48,7 +48,7 @@ func writeHtml(newUrl string) {
 				<p class="text-light fs-5 m-3">link</p>
 			</div>
 			<div class="row d-flex mt-3 ">
-				<a class="text-primary m-3" href="%v">%v</a>
+				<p class="text-primary m-3" href="%v">%v</p>
 			</div>
 		</div>
 	</div>
@@ -62,6 +62,7 @@ func writeHtml(newUrl string) {
 
 // var urlMap map[string]string
 var urlMap = make(map[string]string)
+var port string
 
 // Key üreteci
 func generateKey() string {
@@ -73,13 +74,12 @@ func generateKey() string {
 		key += alphabe[rand]
 	}
 	// Eğer linkler aynı olursa tekrar key üretme
-	formatKey := fmt.Sprintf("localhost:5000/linkpage/%v", key)
+	formatKey := fmt.Sprintf("localhost:%v/linkpage/%v", port, key)
 	for key := range urlMap {
 		if key == formatKey {
 			generateKey()
 		}
 	}
-
 	return key
 }
 
@@ -96,18 +96,19 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 func urlShorter(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		key := generateKey()
-		newUrl := fmt.Sprintf("localhost:5000/linkpage/%v", key) // yeni url oluşturuldu
-		oldUrl := r.FormValue("url")                             //  gelen url alındı
-		urlMap[newUrl] = oldUrl                                  // oldUrl = Gelen Url newUrl yarattığımız Url
+		newUrl := fmt.Sprintf("localhost:%v/linkpage/%v", port, key) // yeni url oluşturuldu
+		oldUrl := r.FormValue("url")                                 //  gelen url alındı
+		urlMap[newUrl] = oldUrl                                      // oldUrl = Gelen Url newUrl yarattığımız Url
 		writeHtml(newUrl)
 		logging(newUrl, oldUrl)
+		//logging(newUrl, oldUrl)
 		http.Redirect(w, r, "/linkpage", http.StatusSeeOther)
 	}
 }
 
 // Url'yi yönlendirici
 func redirectUrl(w http.ResponseWriter, r *http.Request) {
-	hosts := fmt.Sprintf("localhost:5000%v", r.URL.Path)
+	hosts := fmt.Sprintf("localhost:%v%v", port, r.URL.Path)
 	for key, value := range urlMap {
 		fmt.Printf("Key : %v\n", key)
 		if key == hosts {
@@ -163,28 +164,28 @@ func logging(newUrl string, oldUrl string) {
 	logText := string(logByte)
 
 	if logText == "" {
-		logText += fmt.Sprintf("Ip : %v,\tNewUrl : %v\tOldUrl : %v", ipv4, newUrl, oldUrl)
+		logText += fmt.Sprintf("Ip :%v,NewUrl :%v,OldUrl :%v", ipv4, newUrl, oldUrl)
 		os.WriteFile("logging.txt", []byte(logText), 0755)
 		return
 	}
-	logText += fmt.Sprintf("\nIP : %v\t,newUrl : %v\tOldUrl : %v", ipv4, newUrl, oldUrl)
+	logText += fmt.Sprintf("\nIP :%v,newUrl :%v,OldUrl :%v", ipv4, newUrl, oldUrl)
 	os.WriteFile("logging.txt", []byte(logText), 0755)
 }
+
 func redirectHome(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/homepage", http.StatusSeeOther)
 }
 
 // MAİN
 func main() {
-
+	port = os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
 	http.HandleFunc("/", redirectHome)
 	http.HandleFunc("/linkpage", linkPage)
 	http.HandleFunc("/homepage", homePage)
 	http.HandleFunc("/action-url", urlShorter)
 	http.HandleFunc("/linkpage/{key}", redirectUrl)
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = ":8000"
-	}
 	http.ListenAndServe(":"+port, nil)
 }
