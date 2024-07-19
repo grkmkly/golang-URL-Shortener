@@ -57,7 +57,7 @@ func writeHtml(newUrl string) {
 		crossorigin="anonymous"></script>
 </body>
 </html>`, urlMap[newUrl], newUrl)
-	os.WriteFile("src/newUrl.html", []byte(html), 0755)
+	os.WriteFile("api/newUrl.html", []byte(html), 0755)
 }
 
 // var urlMap map[string]string
@@ -85,7 +85,7 @@ func generateKey() string {
 
 // HomePage oluşturucu
 func homePage(w http.ResponseWriter, r *http.Request) {
-	htmlByte, err := os.ReadFile("src/index.html")
+	htmlByte, err := os.ReadFile("api/homepage.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -120,7 +120,7 @@ func redirectUrl(w http.ResponseWriter, r *http.Request) {
 
 // Link sayfası oluşturucu
 func linkPage(w http.ResponseWriter, r *http.Request) {
-	htmlByte, err := os.ReadFile("src/newUrl.html")
+	htmlByte, err := os.ReadFile("api/newUrl.html")
 	if err != nil {
 		log.Fatal(err)
 	}
