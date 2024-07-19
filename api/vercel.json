@@ -1,0 +1,15 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "main.go",
+        "use": "@vercel/go"
+      }
+    ],
+    "routes": [
+      { "src": "/", "dest": "/homepage.html" },
+      { "src": "/action-url", "dest": "/main.go" },
+      { "src": "/linkpage", "dest": "/linkpage.html" },
+      { "src": "/(.*)", "dest": "/$1" }
+    ]
+  }

@@ -178,9 +178,6 @@ func redirectHome(w http.ResponseWriter, r *http.Request) {
 
 // MAİN
 func main() {
-	fs := http.FileServer(http.Dir("./api"))
-	http.Handle("/", fs)
-
 	port = os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
