@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 func writeHtml(newUrl string) {
@@ -61,20 +63,25 @@ func writeHtml(newUrl string) {
 }
 
 // var urlMap map[string]string
-var urlMap = make(map[string]string)
 var port string
+var urlMap = make(map[string]string)
+
+//	var localIP = net.IPAddr{
+//		IP: net.ParseIP("127.0.0.1"),
+//	}
+var Ipv4, _ = getIpAdrs()
 
 // Key üreteci
 func generateKey() string {
 	key := ""
 	alphabet := "ABCDEFGHIJKLMNOPRSTUVYZabcdefghijklmnoprstuvyz"
 	alphabe := strings.Split(alphabet, "")
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 6; i++ {
 		rand := rand.Intn(46)
 		key += alphabe[rand]
 	}
 	// Eğer linkler aynı olursa tekrar key üretme
-	formatKey := fmt.Sprintf("localhost:%v/linkpage/%v", port, key)
+	formatKey := fmt.Sprintf("%v:%v/linkpage/%v", Ipv4.String(), port, key)
 	for key := range urlMap {
 		if key == formatKey {
 			generateKey()
@@ -96,9 +103,9 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 func urlShorter(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		key := generateKey()
-		newUrl := fmt.Sprintf("localhost:%v/linkpage/%v", port, key) // yeni url oluşturuldu
-		oldUrl := r.FormValue("url")                                 //  gelen url alındı
-		urlMap[newUrl] = oldUrl                                      // oldUrl = Gelen Url newUrl yarattığımız Url
+		newUrl := fmt.Sprintf("%v:%v/linkpage/%v", Ipv4.String(), port, key) // yeni url oluşturuldu
+		oldUrl := r.FormValue("url")                                         //  gelen url alındı
+		urlMap[newUrl] = oldUrl                                              // oldUrl = Gelen Url newUrl yarattığımız Url
 		writeHtml(newUrl)
 		logging(newUrl, oldUrl)
 		//logging(newUrl, oldUrl)
@@ -108,9 +115,8 @@ func urlShorter(w http.ResponseWriter, r *http.Request) {
 
 // Url'yi yönlendirici
 func redirectUrl(w http.ResponseWriter, r *http.Request) {
-	hosts := fmt.Sprintf("localhost:%v%v", port, r.URL.Path)
+	hosts := fmt.Sprintf("%v:%v%v", Ipv4.String(), port, r.URL.Path)
 	for key, value := range urlMap {
-		fmt.Printf("Key : %v\n", key)
 		if key == hosts {
 			http.Redirect(w, r, value, http.StatusSeeOther)
 			return
@@ -130,7 +136,6 @@ func linkPage(w http.ResponseWriter, r *http.Request) {
 // Ip adres getirici
 func getIpAdrs() (net.IP, error) {
 	var ipv4 net.IP
-
 	host, err := os.Hostname() // PC'nin hostuna bakılıyor
 	if err != nil {
 		log.Fatal(err)
@@ -140,8 +145,8 @@ func getIpAdrs() (net.IP, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	for _, value := range adrrs {
+		fmt.Println(value)
 		ipv4 = value.To4() // Pcnin ip değerlerindeki ipv4 değerini alıyor
 		if ipv4 != nil {
 			return ipv4, nil
@@ -178,14 +183,16 @@ func redirectHome(w http.ResponseWriter, r *http.Request) {
 
 // MAİN
 func main() {
-	port = os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
 	}
+	port = os.Getenv("PORT")
 	http.HandleFunc("/", redirectHome)
 	http.HandleFunc("/linkpage", linkPage)
 	http.HandleFunc("/homepage", homePage)
 	http.HandleFunc("/action-url", urlShorter)
 	http.HandleFunc("/linkpage/{key}", redirectUrl)
 	http.ListenAndServe(":"+port, nil)
+
 }
