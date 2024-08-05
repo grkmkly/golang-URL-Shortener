@@ -186,7 +186,7 @@ func main() {
 		log.Fatal(err)
 	}
 	port = os.Getenv("PORT")
-	http.Handle("/", http.FileServer(http.Dir("./static")))
+	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./static"))))
 	//http.Handle("/linkpage", http.FileServer(http.Dir("./newUrl")))
 	//http.HandleFunc("/", redirectHome)
 	http.HandleFunc("/linkpage", linkPage)
