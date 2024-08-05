@@ -59,7 +59,7 @@ func writeHtml(newUrl string) {
 		crossorigin="anonymous"></script>
 </body>
 </html>`, urlMap[newUrl], newUrl)
-	os.WriteFile("api/newUrl.html", []byte(html), 0755)
+	os.WriteFile("static/newUrl.html", []byte(html), 0755)
 }
 
 // var urlMap map[string]string
@@ -92,7 +92,7 @@ func generateKey() string {
 
 // HomePage oluşturucu
 func homePage(w http.ResponseWriter, r *http.Request) {
-	htmlByte, err := os.ReadFile("api/homepage.html")
+	htmlByte, err := os.ReadFile("static/index.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -107,7 +107,6 @@ func urlShorter(w http.ResponseWriter, r *http.Request) {
 		oldUrl := r.FormValue("url")                                         //  gelen url alındı
 		urlMap[newUrl] = oldUrl                                              // oldUrl = Gelen Url newUrl yarattığımız Url
 		writeHtml(newUrl)
-		logging(newUrl, oldUrl)
 		//logging(newUrl, oldUrl)
 		http.Redirect(w, r, "/linkpage", http.StatusSeeOther)
 	}
@@ -126,7 +125,7 @@ func redirectUrl(w http.ResponseWriter, r *http.Request) {
 
 // Link sayfası oluşturucu
 func linkPage(w http.ResponseWriter, r *http.Request) {
-	htmlByte, err := os.ReadFile("api/newUrl.html")
+	htmlByte, err := os.ReadFile("static/newUrl.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -146,7 +145,6 @@ func getIpAdrs() (net.IP, error) {
 		log.Fatal(err)
 	}
 	for _, value := range adrrs {
-		fmt.Println(value)
 		ipv4 = value.To4() // Pcnin ip değerlerindeki ipv4 değerini alıyor
 		if ipv4 != nil {
 			return ipv4, nil
@@ -156,30 +154,30 @@ func getIpAdrs() (net.IP, error) {
 }
 
 // LOG dosyasına kayıt
-func logging(newUrl string, oldUrl string) {
-	ipv4, err := getIpAdrs() // İP adresini aldık
-	if err != nil {
-		log.Fatal(err)
-	}
-	// Dosya okuma ve yazma işlemi
-	logByte, err := os.ReadFile("logging.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	logText := string(logByte)
+// func logging(newUrl string, oldUrl string) {
+// 	ipv4, err := getIpAdrs() // İP adresini aldık
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	// Dosya okuma ve yazma işlemi
+// 	logByte, err := os.ReadFile("logging.txt")
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	logText := string(logByte)
 
-	if logText == "" {
-		logText += fmt.Sprintf("Ip :%v,NewUrl :%v,OldUrl :%v", ipv4, newUrl, oldUrl)
-		os.WriteFile("logging.txt", []byte(logText), 0755)
-		return
-	}
-	logText += fmt.Sprintf("\nIP :%v,newUrl :%v,OldUrl :%v", ipv4, newUrl, oldUrl)
-	os.WriteFile("logging.txt", []byte(logText), 0755)
-}
+// 	if logText == "" {
+// 		logText += fmt.Sprintf("Ip :%v,NewUrl :%v,OldUrl :%v", ipv4, newUrl, oldUrl)
+// 		os.WriteFile("logging.txt", []byte(logText), 0755)
+// 		return
+// 	}
+// 	logText += fmt.Sprintf("\nIP :%v,newUrl :%v,OldUrl :%v", ipv4, newUrl, oldUrl)
+// 	os.WriteFile("logging.txt", []byte(logText), 0755)
+// }
 
-func redirectHome(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/homepage", http.StatusSeeOther)
-}
+// func redirectHome(w http.ResponseWriter, r *http.Request) {
+// 	http.Redirect(w, r, "/homepage", http.StatusSeeOther)
+// }
 
 // MAİN
 func main() {
@@ -188,7 +186,9 @@ func main() {
 		log.Fatal(err)
 	}
 	port = os.Getenv("PORT")
-	http.HandleFunc("/", redirectHome)
+	http.Handle("/", http.FileServer(http.Dir("./static")))
+	//http.Handle("/linkpage", http.FileServer(http.Dir("./newUrl")))
+	//http.HandleFunc("/", redirectHome)
 	http.HandleFunc("/linkpage", linkPage)
 	http.HandleFunc("/homepage", homePage)
 	http.HandleFunc("/action-url", urlShorter)
