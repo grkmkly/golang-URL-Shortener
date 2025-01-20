@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -15,7 +16,13 @@ import (
 
 func homepage() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Homepage"))
+		w.Header().Set("Content-Type", "text/html")
+		htmlFile, err := os.ReadFile("src/index.html") // Adjust the path to your HTML file
+		if err != nil {
+			http.Error(w, "Could not read HTML file", http.StatusInternalServerError)
+			return
+		}
+		w.Write(htmlFile)
 	}
 }
 func getLink(modURL *model.URLModel) func(w http.ResponseWriter, r *http.Request) {
@@ -67,6 +74,7 @@ func redirect() func(w http.ResponseWriter, r *http.Request) {
 }
 
 func MainHandler(r *mux.Router, model *model.URLModel) {
+	r.HandleFunc("/", homepage()).Methods("GET")
 	r.HandleFunc("/homepage", homepage()).Methods("GET")
 	r.HandleFunc("/getlink", getLink(model)).Methods("POST")
 	r.HandleFunc("/link/{key}", redirect()).Methods("GET")
