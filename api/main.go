@@ -3,10 +3,11 @@ package main
 import (
 	"net/http"
 
+	"api/main.go/api/handler"
+	"api/main.go/api/model"
+
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
-	"main.go/handler"
-	"main.go/model"
 )
 
 var myModel *model.URLModel = new(model.URLModel)

@@ -9,9 +9,10 @@ import (
 	"os"
 	"strings"
 
+	"api/main.go/api/model"
+	"api/main.go/api/utils"
+
 	"github.com/gorilla/mux"
-	"main.go/model"
-	"main.go/utils"
 )
 
 func homepage() func(w http.ResponseWriter, r *http.Request) {
