@@ -1,4 +1,4 @@
-package main
+package model
 
 type URLModel struct {
 	LongLink  string `json:"longLink"`

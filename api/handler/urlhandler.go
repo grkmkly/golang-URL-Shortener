@@ -1,6 +1,8 @@
-package main
+package handler
 
 import (
+	"api/main.go/api/model"
+	"api/main.go/api/utils"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,9 +10,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
-	"api/main.go/api/model"
-	"api/main.go/api/utils"
 
 	"github.com/gorilla/mux"
 )

@@ -1,13 +1,13 @@
 package utils
 
 import (
-	"api/model"
+	"api/main.go/api/model"
 	"fmt"
 	"math/rand"
 	"strings"
 )
 
-var ModelArray []Model.URLModel
+var ModelArray []model.URLModel
 
 func GenerateKey(modURL *model.URLModel) bool {
 	key := ""
