@@ -18,7 +18,7 @@ import (
 func Homepage() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		htmlFile, err := os.ReadFile("src/index.html") // Adjust the path to your HTML file
+		htmlFile, err := os.ReadFile("public/index.html") // Adjust the path to your HTML file
 		if err != nil {
 			http.Error(w, "Could not read HTML file", http.StatusInternalServerError)
 			return

@@ -25,7 +25,7 @@ func GenerateKey(modURL *model.URLModel) bool {
 		ModelArray = append(ModelArray, *modURL)
 		return true
 	} else if len(ModelArray) > 10 { // Eğer array doluysa arrayin ilk elemanını sil
-		updateMapArray()
+		UpdateMapArray()
 		modURL.ShortLink = formatKey
 		modURL.Key = key
 		ModelArray = append(ModelArray, *modURL)
@@ -50,6 +50,6 @@ func GenerateKey(modURL *model.URLModel) bool {
 }
 
 // UpdateArray fonksiyonu arrayin ilk elemanını siler ve arrayi günceller
-func updateMapArray() {
+func UpdateMapArray() {
 	ModelArray = ModelArray[1:] // Arrayin ilk elemanını sil
 }
