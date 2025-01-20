@@ -15,7 +15,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func homepage() func(w http.ResponseWriter, r *http.Request) {
+func Homepage() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		htmlFile, err := os.ReadFile("src/index.html") // Adjust the path to your HTML file
@@ -26,7 +26,7 @@ func homepage() func(w http.ResponseWriter, r *http.Request) {
 		w.Write(htmlFile)
 	}
 }
-func getLink(modURL *model.URLModel) func(w http.ResponseWriter, r *http.Request) {
+func GetLink(modURL *model.URLModel) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		// Gelen json verisini modeldeki longlink'e ata
@@ -61,7 +61,7 @@ func getLink(modURL *model.URLModel) func(w http.ResponseWriter, r *http.Request
 		fmt.Fprint(w, string(writeJson))
 	}
 }
-func redirect() func(w http.ResponseWriter, r *http.Request) {
+func Redirect() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		key := vars["key"]
@@ -75,8 +75,8 @@ func redirect() func(w http.ResponseWriter, r *http.Request) {
 }
 
 func MainHandler(r *mux.Router, model *model.URLModel) {
-	r.HandleFunc("/", homepage()).Methods("GET")
-	r.HandleFunc("/homepage", homepage()).Methods("GET")
-	r.HandleFunc("/getlink", getLink(model)).Methods("POST")
-	r.HandleFunc("/link/{key}", redirect()).Methods("GET")
+	r.HandleFunc("/", Homepage()).Methods("GET")
+	r.HandleFunc("/homepage", Homepage()).Methods("GET")
+	r.HandleFunc("/getlink", GetLink(model)).Methods("POST")
+	r.HandleFunc("/link/{key}", Redirect()).Methods("GET")
 }
