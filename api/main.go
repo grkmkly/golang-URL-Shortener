@@ -1,10 +1,8 @@
 package main
 
 import (
-	"net/http"
-
-	"api/main.go/api/handler"
 	"api/main.go/api/model"
+	"net/http"
 
 	"github.com/gorilla/mux"
 )
@@ -15,6 +13,6 @@ var port = "8080"
 func main() {
 	r := mux.NewRouter()
 	myModel.Port = port
-	handler.MainHandler(r, myModel)
+	MainHandler(r, myModel)
 	http.ListenAndServe(":"+myModel.Port, r)
 }
