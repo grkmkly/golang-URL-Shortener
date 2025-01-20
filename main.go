@@ -10,7 +10,7 @@ import (
 )
 
 var myModel *model.URLModel = new(model.URLModel)
-var port = "8000"
+var port = "8080"
 
 func main() {
 	r := mux.NewRouter()
