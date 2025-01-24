@@ -38,11 +38,8 @@ func GetLink(modURL *model.URLModel) func(w http.ResponseWriter, r *http.Request
 		var splitString []string = strings.Split(longLink.LongLink, "://") // Gelen linki parçala
 		fmt.Println(splitString[0])
 		modURL.LongLink = splitString[1] // Parçalanan linki modeldeki longlink'e ata
-		var ipv4, err = utils.GetIpAdrs()
-		modURL.Ipv4 = ipv4.String() // Ip adresini modeldeki ipv4'e ata
-		if err != nil {
-			log.Fatal(err)
-		}
+		//var ipv4, err = utils.GetIpAdrs()
+		modURL.Ipv4 = os.Getenv("HOSTIP")
 
 		isTrue := utils.GenerateKey(modURL)
 		if !isTrue {
