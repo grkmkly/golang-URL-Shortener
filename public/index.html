@@ -13,6 +13,8 @@
 	<div class="container-fluid text-center " style="height:100%;">
 		<div class="row d-flex align-items-center h-100">
 			<div class="m-3 h-100">
+				<div class="row d-flex">
+					<p class="fs-1 text-light">grkmkly_35</p>
 				<form id="urlForm">
 					<div class="row d-flex mt-3 ">
 						<p class="fs-2 text-light">--- enter url and click submit ---</p>
@@ -44,16 +46,16 @@
 		form.addEventListener('submit', async (event) => {
 			event.preventDefault(); // Sayfanın yenilenmesini engelle
 
-			const longlink = document.getElementById('url').value;
+			const LongLink = document.getElementById('url').value;
 
 			try {
 				// API'ye POST isteği gönder
-				const response = await fetch('https://golang-url-shortene.vercel.app/api/getlink', {
+				const response = await fetch('http://127.0.0.1:8080/getlink', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify({ longlink }),
+					body: JSON.stringify({ LongLink}), // JSON formatında veriyi gönder
 				});
 
 				if (!response.ok) {
