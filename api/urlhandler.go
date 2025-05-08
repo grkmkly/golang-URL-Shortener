@@ -27,7 +27,7 @@ func GetLink(modURL *model.URLModel) func(w http.ResponseWriter, r *http.Request
 		var splitString []string = strings.Split(longLink.LongLink, "://") // Gelen linki parçala
 		modURL.LongLink = splitString[1]                                   // Parçalanan linki modeldeki longlink'e ata
 		//var ipv4, err = utils.GetIpAdrs()
-		modURL.Ipv4 = os.Getenv("HOSTIP")
+		modURL.Ipv4 = os.Getenv("HOSTNAME")
 
 		isTrue := utils.GenerateKey(modURL)
 		if !isTrue {
