@@ -1,8 +1,6 @@
-package handler
+package api
 
 import (
-	"api/main.go/api/model"
-	"api/main.go/api/utils"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,19 +10,10 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	"main.go/model"
+	"main.go/utils"
 )
 
-func Homepage() func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/html")
-		htmlFile, err := os.ReadFile("public/index.html") // Adjust the path to your HTML file
-		if err != nil {
-			http.Error(w, "Could not read HTML file", http.StatusInternalServerError)
-			return
-		}
-		w.Write(htmlFile)
-	}
-}
 func GetLink(modURL *model.URLModel) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -36,8 +25,7 @@ func GetLink(modURL *model.URLModel) func(w http.ResponseWriter, r *http.Request
 			log.Fatal(err1)
 		}
 		var splitString []string = strings.Split(longLink.LongLink, "://") // Gelen linki parçala
-		fmt.Println(splitString[0])
-		modURL.LongLink = splitString[1] // Parçalanan linki modeldeki longlink'e ata
+		modURL.LongLink = splitString[1]                                   // Parçalanan linki modeldeki longlink'e ata
 		//var ipv4, err = utils.GetIpAdrs()
 		modURL.Ipv4 = os.Getenv("HOSTIP")
 
@@ -71,8 +59,6 @@ func Redirect() func(w http.ResponseWriter, r *http.Request) {
 }
 
 func MainHandler(r *mux.Router, model *model.URLModel) {
-	r.HandleFunc("/", Homepage()).Methods("GET")
-	r.HandleFunc("/homepage", Homepage()).Methods("GET")
 	r.HandleFunc("/getlink", GetLink(model)).Methods("POST")
 	r.HandleFunc("/link/{key}", Redirect()).Methods("GET")
 }

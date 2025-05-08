@@ -1,10 +1,11 @@
 package utils
 
 import (
-	"api/main.go/api/model"
 	"fmt"
 	"math/rand"
 	"strings"
+
+	"main.go/model"
 )
 
 var ModelArray []model.URLModel
